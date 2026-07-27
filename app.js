@@ -15,14 +15,10 @@ const userCount = document.getElementById('user-count');
 const chatMessages = document.getElementById('chat-messages');
 const chatInput = document.getElementById('chat-input');
 const sendBtn = document.getElementById('send-btn');
-const chatToggle = document.getElementById('chat-toggle');
-const chatBadge = document.getElementById('chat-badge');
-const chatSection = document.getElementById('chat-section');
 
 let isSyncing = false;
 let username = '';
 let currentRoom = '';
-let unreadCount = 0;
 
 // Generate random room code
 function generateRoomCode() {
@@ -115,70 +111,13 @@ function sendMessage() {
     }
 }
 
-// Chat message received
 socket.on('chat-message', ({ username: user, message, time }) => {
     const div = document.createElement('div');
     div.className = 'chat-msg';
-    div.innerHTML = `<div class="msg-user">${user} · ${time}</div>`;
-    div.innerHTML += `<div class="msg-text">${escapeHtml(message)}</div>`;
+    div.innerHTML = `<div class="msg-user">${user} · ${time}</div><div class="msg-text">${escapeHtml(message)}</div>`;
     chatMessages.appendChild(div);
     chatMessages.scrollTop = chatMessages.scrollHeight;
-
-    // Show popup notification on mobile if from someone else
-    if (user !== username) {
-        showChatPopup(user, message);
-    }
 });
-
-// Mobile chat popup notification
-function showChatPopup(user, message) {
-    if (window.innerWidth > 768) return;
-
-    // Remove existing popup
-    const existing = document.querySelector('.chat-popup');
-    if (existing) existing.remove();
-
-    const popup = document.createElement('div');
-    popup.className = 'chat-popup';
-    popup.innerHTML = `<div class="popup-user">${user}</div>`;
-    popup.innerHTML += `<div class="popup-text">${escapeHtml(message)}</div>`;
-    document.body.appendChild(popup);
-
-    // Auto-hide after 4 seconds
-    setTimeout(() => popup.remove(), 4000);
-
-    // Tap popup to scroll to chat
-    popup.addEventListener('click', () => {
-        popup.remove();
-        scrollToChat();
-    });
-
-    // Update badge
-    unreadCount++;
-    chatBadge.textContent = unreadCount;
-    chatBadge.classList.remove('hidden');
-}
-
-// Chat toggle button
-chatToggle.addEventListener('click', () => {
-    scrollToChat();
-    unreadCount = 0;
-    chatBadge.classList.add('hidden');
-});
-
-function scrollToChat() {
-    chatSection.scrollIntoView({ behavior: 'smooth' });
-    setTimeout(() => chatInput.focus(), 300);
-}
-
-// Reset badge when chat is visible
-const chatObserver = new IntersectionObserver((entries) => {
-    if (entries[0].isIntersecting) {
-        unreadCount = 0;
-        chatBadge.classList.add('hidden');
-    }
-});
-chatObserver.observe(chatMessages);
 
 // User events
 socket.on('user-joined', ({ username: user, users }) => {
