@@ -150,3 +150,70 @@ function escapeHtml(str) {
     div.textContent = str;
     return div.innerHTML;
 }
+
+// Mobile chat popup notification
+let unreadCount = 0;
+const chatToggle = document.getElementById('chat-toggle');
+const chatBadge = document.getElementById('chat-badge');
+
+// Show popup when message received (on mobile)
+function showChatPopup(user, message) {
+    if (window.innerWidth > 768) return; // only on mobile
+    
+    // Remove existing popup
+    const existing = document.querySelector('.chat-popup');
+    if (existing) existing.remove();
+
+    const popup = document.createElement('div');
+    popup.className = 'chat-popup';
+    popup.innerHTML = `<div class="popup-user">${user}</div><div class="popup-text">${escapeHtml(message)}</div>`;
+    document.body.appendChild(popup);
+
+    // Auto-hide after 4 seconds
+    setTimeout(() => popup.remove(), 4000);
+
+    // Tap popup to scroll to chat
+    popup.addEventListener('click', () => {
+        popup.remove();
+        chatMessages.scrollIntoView({ behavior: 'smooth' });
+        chatInput.focus();
+    });
+
+    // Update badge
+    unreadCount++;
+    chatBadge.textContent = unreadCount;
+    chatBadge.classList.remove('hidden');
+    chatToggle.classList.remove('hidden');
+}
+
+// Override chat-message listener to show popup
+socket.on('chat-message', ({ username: user, message, time }) => {
+    const div = document.createElement('div');
+    div.className = 'chat-msg';
+    div.innerHTML = `<div class="msg-user">${user} · ${time}</div><div class="msg-text">${escapeHtml(message)}</div>`;
+    chatMessages.appendChild(div);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+
+    // Show popup if message is from someone else
+    if (user !== username) {
+        showChatPopup(user, message);
+    }
+});
+
+// Chat toggle button — scroll to chat
+chatToggle.addEventListener('click', () => {
+    chatMessages.scrollIntoView({ behavior: 'smooth' });
+    chatInput.focus();
+    unreadCount = 0;
+    chatBadge.classList.add('hidden');
+});
+
+// Reset badge when chat is visible
+const chatObserver = new IntersectionObserver((entries) => {
+    if (entries[0].isIntersecting) {
+        unreadCount = 0;
+        chatBadge.classList.add('hidden');
+    }
+});
+chatObserver.observe(chatMessages);
+
