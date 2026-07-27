@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Watch Together 🎬</title>
     <link rel="stylesheet" href="style.css">
 </head>
@@ -28,11 +28,11 @@
                     <span id="user-count"></span>
                 </div>
                 <div class="video-container">
-                    <video id="video-player" controls playsinline webkit-playsinline>
+                    <video id="video-player" controls>
                         Your browser does not support video.
                     </video>
                     <div id="no-video" class="no-video">
-                        <p>📁 Select a movie file</p>
+                        <p>📁 Select a movie file to start watching</p>
                         <label for="file-input" class="file-label">Choose File</label>
                         <input type="file" id="file-input" accept="video/*" hidden>
                     </div>
@@ -44,7 +44,7 @@
             </div>
 
             <!-- Chat Section -->
-            <div class="chat-section" id="chat-section">
+            <div class="chat-section">
                 <div class="chat-header">💬 Chat</div>
                 <div id="chat-messages" class="chat-messages"></div>
                 <div class="chat-input-area">
@@ -54,12 +54,6 @@
             </div>
         </div>
     </div>
-
-    <!-- Floating chat toggle for mobile -->
-    <button class="chat-toggle" id="chat-toggle">
-        💬
-        <span class="chat-badge hidden" id="chat-badge">0</span>
-    </button>
 
     <script src="/socket.io/socket.io.js"></script>
     <script src="app.js"></script>
