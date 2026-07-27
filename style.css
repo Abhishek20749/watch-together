@@ -236,3 +236,13 @@ body {
         font-size: 0.75rem;
     }
 }
+
+
+
+#video-player::-webkit-media-controls-fullscreen-button {
+    display: none;
+}
+
+video {
+    max-height: 100% !important;
+}
