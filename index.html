@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Watch Together 🎬</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Join Screen -->
+    <div id="join-screen" class="screen">
+        <div class="join-container">
+            <h1>🎬 Watch Together</h1>
+            <p>Watch movies with friends in perfect sync</p>
+            <input type="text" id="username-input" placeholder="Your name" maxlength="20">
+            <input type="text" id="room-input" placeholder="Room code (or leave blank to create)">
+            <button id="join-btn">Join Room 🚀</button>
+        </div>
+    </div>
+
+    <!-- Watch Screen -->
+    <div id="watch-screen" class="screen hidden">
+        <div class="watch-layout">
+            <!-- Video Section -->
+            <div class="video-section">
+                <div class="room-info">
+                    <span id="room-code"></span>
+                    <span id="user-count"></span>
+                </div>
+                <div class="video-container">
+                    <video id="video-player" controls playsinline webkit-playsinline>
+                        Your browser does not support video.
+                    </video>
+                    <div id="no-video" class="no-video">
+                        <p>📁 Select a movie file</p>
+                        <label for="file-input" class="file-label">Choose File</label>
+                        <input type="file" id="file-input" accept="video/*" hidden>
+                    </div>
+                </div>
+                <div class="video-controls">
+                    <label for="file-input-btn" class="btn-file">📁 Change File</label>
+                    <input type="file" id="file-input-btn" accept="video/*" hidden>
+                </div>
+            </div>
+
+            <!-- Chat Section -->
+            <div class="chat-section" id="chat-section">
+                <div class="chat-header">💬 Chat</div>
+                <div id="chat-messages" class="chat-messages"></div>
+                <div class="chat-input-area">
+                    <input type="text" id="chat-input" placeholder="Type a message..." maxlength="500">
+                    <button id="send-btn">Send</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating chat toggle for mobile -->
+    <button class="chat-toggle" id="chat-toggle">
+        💬
+        <span class="chat-badge hidden" id="chat-badge">0</span>
+    </button>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
