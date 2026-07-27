@@ -5,7 +5,6 @@ body {
     background: #1a1a2e;
     color: #fff;
     min-height: 100vh;
-    overflow: hidden;
 }
 
 .hidden { display: none !important; }
@@ -91,7 +90,6 @@ body {
     width: 100%;
     height: 100%;
     object-fit: contain;
-    max-height: 100%;
 }
 
 .no-video {
@@ -113,8 +111,6 @@ body {
     cursor: pointer;
     font-weight: 500;
     transition: background 0.2s;
-    display: inline-block;
-    text-align: center;
 }
 
 .file-label:hover, .btn-file:hover { background: #c73e54; }
@@ -182,7 +178,6 @@ body {
     background: #1a1a2e;
     color: #fff;
     outline: none;
-    font-size: 0.9rem;
 }
 
 #send-btn {
@@ -195,118 +190,9 @@ body {
     font-weight: 600;
 }
 
-/* Floating Chat Notification */
-.chat-popup {
-    position: fixed;
-    bottom: 80px;
-    right: 15px;
-    background: #16213e;
-    border: 1px solid #e94560;
-    border-radius: 12px;
-    padding: 10px 15px;
-    max-width: 280px;
-    z-index: 999;
-    animation: popUp 0.3s ease;
-    box-shadow: 0 5px 20px rgba(0,0,0,0.5);
-}
-
-.chat-popup .popup-user {
-    color: #e94560;
-    font-size: 0.75rem;
-    font-weight: 600;
-}
-
-.chat-popup .popup-text {
-    color: #fff;
-    font-size: 0.85rem;
-    margin-top: 3px;
-}
-
-@keyframes popUp {
-    from { transform: translateY(20px); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
-}
-
-/* Floating chat toggle button */
-.chat-toggle {
-    position: fixed;
-    bottom: 20px;
-    right: 15px;
-    width: 50px;
-    height: 50px;
-    background: #e94560;
-    border-radius: 50%;
-    display: none;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.5rem;
-    cursor: pointer;
-    z-index: 998;
-    box-shadow: 0 4px 15px rgba(233,69,96,0.4);
-    border: none;
-    color: #fff;
-}
-
-.chat-badge {
-    position: absolute;
-    top: -5px;
-    right: -5px;
-    background: #ffd700;
-    color: #000;
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    font-size: 0.7rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 700;
-}
-
-
-/* Prevent video fullscreen on mobile */
-#video-player::-webkit-media-controls-fullscreen-button {
-    display: none;
-}
-
 /* Mobile */
 @media (max-width: 768px) {
-    body { overflow: auto; }
-
-    .watch-layout { 
-        flex-direction: column; 
-        height: auto;
-        min-height: 100vh;
-    }
-    .video-section { 
-        flex: none;
-        height: 35vh;
-        padding: 5px;
-    }
-    .video-container {
-        height: calc(35vh - 50px);
-        border-radius: 8px;
-    }
-    #video-player {
-        max-height: 100% !important;
-    }
-    .video-controls {
-        padding: 5px 0;
-    }
-    .room-info {
-        padding: 5px 10px;
-        margin-bottom: 5px;
-        font-size: 0.75rem;
-    }
-    .btn-file {
-        padding: 6px 12px;
-        font-size: 0.75rem;
-    }
-    .chat-section { 
-        width: 100%; 
-        height: 55vh;
-        border-left: none;
-        border-top: 1px solid #333;
-    }
-    .chat-toggle { display: flex; }
+    .watch-layout { flex-direction: column; }
+    .chat-section { width: 100%; height: 250px; }
+    .video-section { height: 50vh; }
 }
