@@ -191,23 +191,48 @@ body {
 }
 
 /* Mobile */
+/* Mobile */
 @media (max-width: 768px) {
     .watch-layout { 
         flex-direction: column; 
         height: 100vh;
+        overflow: hidden;
     }
     .video-section { 
-        flex: 1;
-        min-height: 40vh;
-        max-height: 50vh;
+        flex: none;
+        height: 35vh;
+        padding: 5px;
+    }
+    .video-container {
+        height: calc(35vh - 60px);
+        border-radius: 8px;
+    }
+    #video-player {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        max-height: 100%;
+    }
+    .video-controls {
+        padding: 5px 0;
+    }
+    .room-info {
+        padding: 5px 10px;
+        margin-bottom: 5px;
+        font-size: 0.75rem;
     }
     .chat-section { 
         width: 100%; 
-        height: 45vh;
+        flex: 1;
         border-left: none;
         border-top: 1px solid #333;
     }
-    .video-container {
-        height: 100%;
+    .chat-header {
+        padding: 8px;
+        font-size: 0.85rem;
+    }
+    .btn-file {
+        padding: 6px 12px;
+        font-size: 0.75rem;
     }
 }
