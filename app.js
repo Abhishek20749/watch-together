@@ -9,18 +9,18 @@ const joinBtn = document.getElementById('join-btn');
 const video = document.getElementById('video-player');
 const noVideo = document.getElementById('no-video');
 const fileInput = document.getElementById('file-input');
-const fileInputBtn = document.getElementById('file-input-btn');
-const roomCode = document.getElementById('room-code');
-const userCount = document.getElementById('user-count');
+const roomNameEl = document.getElementById('room-name');
+const userCountEl = document.getElementById('user-count');
 const chatMessages = document.getElementById('chat-messages');
 const chatInput = document.getElementById('chat-input');
 const sendBtn = document.getElementById('send-btn');
+const copyRoomBtn = document.getElementById('copy-room-btn');
 
 let isSyncing = false;
 let username = '';
 let currentRoom = '';
 
-// Generate random room code
+// Generate room code
 function generateRoomCode() {
     return Math.random().toString(36).substring(2, 8).toUpperCase();
 }
@@ -31,49 +31,40 @@ joinBtn.addEventListener('click', () => {
     if (!username) { alert('Please enter your name'); return; }
 
     currentRoom = roomInput.value.trim() || generateRoomCode();
-    
     socket.emit('join-room', { roomId: currentRoom, username });
 
     joinScreen.classList.add('hidden');
     watchScreen.classList.remove('hidden');
-    roomCode.textContent = `Room: ${currentRoom}`;
+    roomNameEl.textContent = currentRoom;
+});
+
+// Enter key on inputs
+usernameInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') roomInput.focus(); });
+roomInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') joinBtn.click(); });
+
+// Copy room code
+copyRoomBtn.addEventListener('click', () => {
+    navigator.clipboard.writeText(currentRoom).then(() => {
+        copyRoomBtn.textContent = '✓';
+        setTimeout(() => copyRoomBtn.textContent = '📋', 2000);
+    });
 });
 
 // File selection
-fileInput.addEventListener('change', handleFile);
-fileInputBtn.addEventListener('change', handleFile);
-
-function handleFile(e) {
+fileInput.addEventListener('change', (e) => {
     const file = e.target.files[0];
     if (file) {
-        const url = URL.createObjectURL(file);
-        video.src = url;
+        video.src = URL.createObjectURL(file);
         noVideo.classList.add('hidden');
-        video.style.display = 'block';
         addSystemMessage(`You loaded: ${file.name}`);
     }
-}
-
-// Video sync events
-video.addEventListener('play', () => {
-    if (!isSyncing) {
-        socket.emit('play', { time: video.currentTime });
-    }
 });
 
-video.addEventListener('pause', () => {
-    if (!isSyncing) {
-        socket.emit('pause', { time: video.currentTime });
-    }
-});
+// Video sync
+video.addEventListener('play', () => { if (!isSyncing) socket.emit('play', { time: video.currentTime }); });
+video.addEventListener('pause', () => { if (!isSyncing) socket.emit('pause', { time: video.currentTime }); });
+video.addEventListener('seeked', () => { if (!isSyncing) socket.emit('seek', { time: video.currentTime }); });
 
-video.addEventListener('seeked', () => {
-    if (!isSyncing) {
-        socket.emit('seek', { time: video.currentTime });
-    }
-});
-
-// Receive sync from others
 socket.on('play', ({ time, username: user }) => {
     isSyncing = true;
     video.currentTime = time;
@@ -99,9 +90,7 @@ socket.on('seek', ({ time, username: user }) => {
 
 // Chat
 sendBtn.addEventListener('click', sendMessage);
-chatInput.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') sendMessage();
-});
+chatInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendMessage(); });
 
 function sendMessage() {
     const msg = chatInput.value.trim();
@@ -111,42 +100,92 @@ function sendMessage() {
     }
 }
 
-socket.on('chat-message', ({ username: user, message, time }) => {
+socket.on('chat-message', ({ username: user, message }) => {
+    const isMe = user === username;
     const div = document.createElement('div');
-    div.className = 'chat-msg';
-    div.innerHTML = `<div class="msg-user">${user} · ${time}</div><div class="msg-text">${escapeHtml(message)}</div>`;
+    div.className = `chat-bubble ${isMe ? 'mine' : 'other'}`;
+    div.innerHTML = `<div class="bubble-name">${user}</div><div class="bubble-text">${escapeHtml(message)}</div>`;
     chatMessages.appendChild(div);
     chatMessages.scrollTop = chatMessages.scrollHeight;
+
+    // Show toast notification if message is from someone else
+    if (!isMe) {
+        showToast(user, message);
+    }
 });
+
+// Toast notification
+function showToast(user, message) {
+    // Remove existing toast
+    const existing = document.querySelector('.toast-notification');
+    if (existing) existing.remove();
+
+    const toast = document.createElement('div');
+    toast.className = 'toast-notification';
+    toast.innerHTML = `<div class="toast-name">${user}</div><div class="toast-text">${escapeHtml(message)}</div>`;
+    document.body.appendChild(toast);
+
+    // Tap to dismiss and scroll to chat
+    toast.addEventListener('click', () => {
+        toast.remove();
+        chatMessages.scrollIntoView({ behavior: 'smooth' });
+        chatInput.focus();
+    });
+
+    // Auto-hide after 5 seconds
+    setTimeout(() => { if (toast.parentNode) toast.remove(); }, 5000);
+}
 
 // User events
 socket.on('user-joined', ({ username: user, users }) => {
-    userCount.textContent = `${users.length} online`;
-    addSystemMessage(`${user} joined the room`);
+    userCountEl.textContent = `👥 ${users.length}`;
+    addSystemMessage(`${user} joined`);
 });
 
 socket.on('user-left', ({ username: user, users }) => {
-    userCount.textContent = `${users.length} online`;
-    addSystemMessage(`${user} left the room`);
+    userCountEl.textContent = `👥 ${users.length}`;
+    addSystemMessage(`${user} left`);
+});
+
+// Fake fullscreen toggle (allows toast to show over video)
+document.getElementById('fullscreen-btn').addEventListener('click', () => {
+    const videoArea = document.getElementById('video-area');
+    const btn = document.getElementById('fullscreen-btn');
+    
+    if (videoArea.classList.contains('fake-fullscreen')) {
+        videoArea.classList.remove('fake-fullscreen');
+        btn.textContent = '⛶';
+    } else {
+        videoArea.classList.add('fake-fullscreen');
+        btn.textContent = '✕';
+    }
+});
+
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        const videoArea = document.getElementById('video-area');
+        if (videoArea && videoArea.classList.contains('fake-fullscreen')) {
+            videoArea.classList.remove('fake-fullscreen');
+            document.getElementById('fullscreen-btn').textContent = '⛶';
+        }
+    }
 });
 
 // Helpers
 function addSystemMessage(text) {
     const div = document.createElement('div');
-    div.className = 'chat-msg system';
+    div.className = 'chat-bubble system';
     div.textContent = text;
     chatMessages.appendChild(div);
     chatMessages.scrollTop = chatMessages.scrollHeight;
 }
 
-function formatTime(seconds) {
-    const m = Math.floor(seconds / 60);
-    const s = Math.floor(seconds % 60);
-    return `${m}:${s.toString().padStart(2, '0')}`;
+function formatTime(s) {
+    return `${Math.floor(s/60)}:${Math.floor(s%60).toString().padStart(2,'0')}`;
 }
 
 function escapeHtml(str) {
-    const div = document.createElement('div');
-    div.textContent = str;
-    return div.innerHTML;
+    const d = document.createElement('div');
+    d.textContent = str;
+    return d.innerHTML;
 }
