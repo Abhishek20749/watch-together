@@ -5,24 +5,52 @@ const path = require('path');
 
 const app = express();
 const server = http.createServer(app);
-const io = new Server(server);
 
-app.use(express.static(__dirname));
+// Socket.IO
+const io = new Server(server, {
+    cors: {
+        origin: "*",
+        methods: ["GET", "POST"]
+    }
+});
+
+app.use(express.static(path.join(__dirname, 'public')));
 
 // Store rooms
 const rooms = {};
 
 io.on('connection', (socket) => {
+    console.log('======================================');
     console.log('User connected:', socket.id);
 
     // Join room
     socket.on('join-room', ({ roomId, username }) => {
+
+        console.log('========== JOIN ROOM ==========');
+        console.log('Room ID:', roomId);
+        console.log('Username:', username);
+        console.log('Socket ID:', socket.id);
+
         socket.join(roomId);
+
+        console.log("Socket joined room:", roomId);
+        console.log("Members in room:", io.sockets.adapter.rooms.get(roomId));
+
         socket.roomId = roomId;
         socket.username = username;
 
-        if (!rooms[roomId]) rooms[roomId] = { users: [] };
-        rooms[roomId].users.push({ id: socket.id, username });
+        if (!rooms[roomId]) {
+            rooms[roomId] = {
+                users: []
+            };
+        }
+
+        rooms[roomId].users.push({
+            id: socket.id,
+            username
+        });
+
+        console.log("Users array:", rooms[roomId].users);
 
         io.to(roomId).emit('user-joined', {
             username,
@@ -30,25 +58,41 @@ io.on('connection', (socket) => {
         });
 
         console.log(`${username} joined room ${roomId}`);
+        console.log('======================================');
     });
 
     // Sync play
     socket.on('play', ({ time }) => {
-        socket.to(socket.roomId).emit('play', { time, username: socket.username });
+        console.log(`${socket.username} PLAY`);
+        socket.to(socket.roomId).emit('play', {
+            time,
+            username: socket.username
+        });
     });
 
     // Sync pause
     socket.on('pause', ({ time }) => {
-        socket.to(socket.roomId).emit('pause', { time, username: socket.username });
+        console.log(`${socket.username} PAUSE`);
+        socket.to(socket.roomId).emit('pause', {
+            time,
+            username: socket.username
+        });
     });
 
     // Sync seek
     socket.on('seek', ({ time }) => {
-        socket.to(socket.roomId).emit('seek', { time, username: socket.username });
+        console.log(`${socket.username} SEEK ${time}`);
+        socket.to(socket.roomId).emit('seek', {
+            time,
+            username: socket.username
+        });
     });
 
-    // Chat message
+    // Chat
     socket.on('chat-message', ({ message }) => {
+
+        console.log(`${socket.username}: ${message}`);
+
         io.to(socket.roomId).emit('chat-message', {
             username: socket.username,
             message,
@@ -58,18 +102,34 @@ io.on('connection', (socket) => {
 
     // Disconnect
     socket.on('disconnect', () => {
+
+        console.log("Disconnected:", socket.id);
+
         if (socket.roomId && rooms[socket.roomId]) {
-            rooms[socket.roomId].users = rooms[socket.roomId].users.filter(u => u.id !== socket.id);
+
+            rooms[socket.roomId].users =
+                rooms[socket.roomId].users.filter(
+                    u => u.id !== socket.id
+                );
+
             io.to(socket.roomId).emit('user-left', {
                 username: socket.username,
                 users: rooms[socket.roomId].users
             });
+
+            console.log("Remaining users:", rooms[socket.roomId].users);
+
+            // Delete empty room
+            if (rooms[socket.roomId].users.length === 0) {
+                delete rooms[socket.roomId];
+                console.log("Room deleted:", socket.roomId);
+            }
         }
-        console.log('User disconnected:', socket.id);
     });
 });
 
 const PORT = process.env.PORT || 3000;
+
 server.listen(PORT, () => {
-    console.log(`Server running on http://localhost:${PORT}`);
+    console.log(`Server running on port ${PORT}`);
 });
