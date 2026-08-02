@@ -1,5 +1,18 @@
 const socket = io();
 
+socket.on("connect", () => {
+    console.log("✅ Connected");
+    console.log("Socket ID:", socket.id);
+});
+
+socket.on("disconnect", () => {
+    console.log("❌ Disconnected");
+});
+
+socket.on("connect_error", (err) => {
+    console.log("❌ Connection Error:", err.message);
+});
+
 // Elements
 const joinScreen = document.getElementById('join-screen');
 const watchScreen = document.getElementById('watch-screen');
@@ -26,15 +39,37 @@ function generateRoomCode() {
 }
 
 // Join room
+// Join room
 joinBtn.addEventListener('click', () => {
+
+    console.log("=================================");
+    console.log("Join button clicked");
+
     username = usernameInput.value.trim();
-    if (!username) { alert('Please enter your name'); return; }
+
+    if (!username) {
+        console.log("❌ Username is empty");
+        alert("Please enter your name");
+        return;
+    }
 
     currentRoom = roomInput.value.trim() || generateRoomCode();
-    socket.emit('join-room', { roomId: currentRoom, username });
 
-    joinScreen.classList.add('hidden');
-    watchScreen.classList.remove('hidden');
+    console.log("Room:", currentRoom);
+    console.log("Username:", username);
+    console.log("Socket Connected:", socket.connected);
+    console.log("Socket ID:", socket.id);
+
+    socket.emit("join-room", {
+        roomId: currentRoom,
+        username
+    });
+
+    console.log("✅ join-room event emitted");
+    console.log("=================================");
+
+    joinScreen.classList.add("hidden");
+    watchScreen.classList.remove("hidden");
     roomNameEl.textContent = currentRoom;
 });
 
