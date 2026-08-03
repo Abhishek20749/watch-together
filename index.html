@@ -4,53 +4,136 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>WatchParty 🎬</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body data-bs-theme="dark">
     <!-- Join Screen -->
     <div id="join-screen" class="screen">
-        <div class="join-container">
-            <div class="join-logo">🎬</div>
-            <h1>WatchParty</h1>
-            <p>Watch together, stay connected</p>
-            <input type="text" id="username-input" placeholder="Your name" maxlength="20">
-            <input type="text" id="room-input" placeholder="Room code (or leave blank to create)">
-            <button id="join-btn">Enter Room</button>
+        <div class="d-flex flex-column align-items-center justify-content-center min-vh-100 px-3">
+            <div class="join-card card border-0 shadow-lg p-4 p-md-5 text-center" style="max-width: 400px; width: 100%;">
+                <div class="mb-3" style="font-size: 3.5rem;">🎬</div>
+                <h1 class="fw-bold mb-1 brand-text">WatchParty</h1>
+                <p class="text-secondary mb-4">Watch together, stay connected</p>
+                <div class="d-flex flex-column gap-3">
+                    <input type="text" id="username-input" class="form-control form-control-lg" placeholder="Your name" maxlength="20">
+                    <input type="text" id="room-input" class="form-control form-control-lg" placeholder="Room code (or leave blank to create)">
+                    <button id="join-btn" class="btn btn-purple btn-lg w-100 fw-semibold mt-2">Enter Room</button>
+                </div>
+            </div>
         </div>
     </div>
 
     <!-- Watch Screen -->
     <div id="watch-screen" class="screen hidden">
         <!-- Top Bar -->
-        <div class="top-bar">
-            <div class="room-name" id="room-name">Room</div>
-            <div class="top-bar-right">
-                <span class="user-count" id="user-count">👥 1</span>
-                <button class="btn-icon" id="copy-room-btn" title="Copy room code">📋</button>
+        <nav class="navbar navbar-dark bg-dark border-bottom border-secondary px-3 py-2">
+            <span class="navbar-brand mb-0 fw-semibold text-purple" id="room-name">Room</span>
+            <div class="d-flex align-items-center gap-2">
+                <span class="badge bg-secondary" id="user-count" data-bs-toggle="offcanvas" data-bs-target="#usersPanel" role="button"><i class="bi bi-people-fill"></i> 1</span>
+                <button class="btn btn-sm btn-outline-light" id="copy-room-btn" title="Copy room code">
+                    <i class="bi bi-clipboard"></i>
+                </button>
+                <button class="btn btn-sm btn-purple" id="share-room-btn">
+                    <i class="bi bi-share-fill"></i> Share
+                </button>
             </div>
-        </div>
+        </nav>
 
-        <!-- Video Area -->
-        <div class="video-area" id="video-area">
-            <video id="video-player" controls playsinline webkit-playsinline></video>
-            <div id="no-video" class="no-video-overlay">
-                <label for="file-input" class="choose-file-btn">📁 Choose Video</label>
-                <input type="file" id="file-input" accept="video/*" hidden>
-            </div>
-            <button class="fullscreen-btn" id="fullscreen-btn">⛶</button>
-        </div>
+        <!-- Main Content -->
+        <div class="container-fluid p-0 flex-grow-1 d-flex flex-column overflow-hidden">
+            <div class="row g-0 flex-grow-1 overflow-hidden">
+                <!-- Video Area -->
+                <div class="col-12 col-lg-8 d-flex flex-column">
+                    <div class="video-area position-relative flex-grow-1" id="video-area">
+                        <video id="video-player" class="w-100 h-100" controls playsinline webkit-playsinline style="object-fit: contain; background: #000;"></video>
+                        <div id="no-video" class="no-video-overlay">
+                            <div class="d-flex flex-column align-items-center gap-2 px-3" style="max-width: 340px; width: 100%;">
+                                <div class="input-group">
+                                    <input type="text" id="url-input" class="form-control" placeholder="Paste video URL (mp4, webm...)">
+                                    <button id="load-url-btn" class="btn btn-purple"><i class="bi bi-play-fill"></i></button>
+                                </div>
+                                <span class="text-secondary small">or</span>
+                                <label for="file-input" class="btn btn-outline-light w-100">
+                                    <i class="bi bi-folder2-open"></i> Choose Local File
+                                </label>
+                                <input type="file" id="file-input" accept="video/*" hidden>
+                            </div>
+                        </div>
+                        <div id="sync-overlay" class="sync-overlay hidden">
+                            <span class="spinner-border spinner-border-sm me-1"></span> Syncing...
+                        </div>
+                        <div class="emoji-container" id="emoji-container"></div>
+                        <div class="emoji-bar" id="emoji-bar">
+                            <button class="emoji-btn" data-emoji="🔥">🔥</button>
+                            <button class="emoji-btn" data-emoji="😂">😂</button>
+                            <button class="emoji-btn" data-emoji="👏">👏</button>
+                            <button class="emoji-btn" data-emoji="❤️">❤️</button>
+                            <button class="emoji-btn" data-emoji="😮">😮</button>
+                            <button class="emoji-btn" data-emoji="💀">💀</button>
+                        </div>
+                        <button class="btn btn-sm btn-purple fullscreen-btn" id="fullscreen-btn">
+                            <i class="bi bi-fullscreen"></i>
+                        </button>
+                    </div>
+                </div>
 
-        <!-- Chat Area -->
-        <div class="chat-area" id="chat-area">
-            <div class="chat-messages" id="chat-messages"></div>
-            <div class="chat-input-bar">
-                <input type="text" id="chat-input" placeholder="Aa" maxlength="500">
-                <button id="send-btn">➤</button>
+                <!-- Chat Area -->
+                <div class="col-12 col-lg-4 d-flex flex-column chat-col">
+                    <div class="chat-area d-flex flex-column flex-grow-1 overflow-hidden" id="chat-area">
+                        <div class="chat-messages flex-grow-1 overflow-auto p-3" id="chat-messages"></div>
+                        <div class="typing-indicator px-3 py-1" id="typing-indicator"></div>
+                        <div class="chat-input-bar p-2 border-top border-secondary">
+                            <div class="input-group">
+                                <input type="text" id="chat-input" class="form-control" placeholder="Type a message..." maxlength="500">
+                                <button id="send-btn" class="btn btn-purple"><i class="bi bi-send-fill"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
+    <!-- Share Modal -->
+    <div class="modal fade" id="shareModal" tabindex="-1" data-bs-theme="dark">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content bg-dark border-secondary">
+                <div class="modal-header border-secondary">
+                    <h6 class="modal-title"><i class="bi bi-share-fill me-2"></i>Share Room</h6>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <p class="text-secondary small mb-3">Send this link to your friends</p>
+                    <div class="input-group mb-3">
+                        <input type="text" id="share-link-input" class="form-control form-control-sm bg-dark text-white border-secondary" readonly>
+                        <button class="btn btn-purple btn-sm" id="copy-link-btn"><i class="bi bi-clipboard"></i></button>
+                    </div>
+                    <div id="qr-code" class="d-flex justify-content-center mb-3"></div>
+                    <div class="d-flex flex-column gap-2">
+                        <div class="text-secondary small">Room Code</div>
+                        <div class="fw-bold fs-4 text-purple" id="share-room-code"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Users Panel -->
+    <div class="offcanvas offcanvas-end" tabindex="-1" id="usersPanel" data-bs-theme="dark">
+        <div class="offcanvas-header border-bottom border-secondary">
+            <h5 class="offcanvas-title"><i class="bi bi-people-fill me-2"></i>Online Users</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        <div class="offcanvas-body p-0">
+            <ul class="list-group list-group-flush" id="users-list"></ul>
+        </div>
+    </div>
+
     <script src="/socket.io/socket.io.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
     <script src="app.js"></script>
 </body>
 </html>
