@@ -28,15 +28,15 @@
     <!-- Watch Screen -->
     <div id="watch-screen" class="screen hidden">
         <!-- Top Bar -->
-        <nav class="navbar navbar-dark bg-dark border-bottom border-secondary px-3 py-2">
-            <span class="navbar-brand mb-0 fw-semibold text-purple" id="room-name">Room</span>
-            <div class="d-flex align-items-center gap-2">
+        <nav class="navbar navbar-dark bg-dark border-bottom border-secondary px-3 py-2" style="min-height: 50px;">
+            <span class="navbar-brand mb-0 fw-semibold text-purple text-truncate" id="room-name" style="max-width: 120px;">Room</span>
+            <div class="d-flex align-items-center gap-1 gap-sm-2 flex-nowrap">
                 <span class="badge bg-secondary" id="user-count" data-bs-toggle="offcanvas" data-bs-target="#usersPanel" role="button"><i class="bi bi-people-fill"></i> 1</span>
                 <button class="btn btn-sm btn-outline-light" id="copy-room-btn" title="Copy room code">
                     <i class="bi bi-clipboard"></i>
                 </button>
                 <button class="btn btn-sm btn-purple" id="share-room-btn">
-                    <i class="bi bi-share-fill"></i> Share
+                    <i class="bi bi-share-fill"></i><span class="d-none d-sm-inline ms-1">Share</span>
                 </button>
             </div>
         </nav>
